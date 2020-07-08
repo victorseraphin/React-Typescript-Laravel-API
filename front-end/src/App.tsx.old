@@ -1,0 +1,40 @@
+import React from 'react';
+import './App.css';
+import { RouteComponentProps, Link, Switch, Route } from 'react-router-dom';
+
+import { history } from './_helpers';
+import { authenticationService } from './_services';
+import { PrivateRoute } from './_components';
+
+
+import CreateProduct from './pages/products/CreateProduct';
+import Products from './pages/products/Products';
+import EditProduct from './pages/products/EditProduct';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import { Layout, Menu } from 'antd';
+
+const { Header } = Layout;
+
+const App: React.FC = () => {
+  return (
+    <div>      
+      <Header>
+        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
+          <Menu.Item key="1">
+            <Link to="/">Produts</Link>
+          </Menu.Item>
+        </Menu>
+        <Switch>
+          <Route path={'/'} exact component={Products} />
+          <Route path={'/login'} exact component={Login} />
+          <Route path={'/register'} exact component={Register} />
+          <Route path={'/product/create'} exact component={CreateProduct} />
+          <Route path={'/product/edit/:id'} exact component={EditProduct} />
+        </Switch>
+      </Header>
+    </div>
+  );
+}
+
+export default App;
