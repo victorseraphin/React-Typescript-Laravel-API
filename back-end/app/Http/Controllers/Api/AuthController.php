@@ -11,21 +11,20 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
   /**
-   * Get a JWT token via given credentials.
-   *
-   * @param  \Illuminate\Http\Request  $request
-   *
-   * @return \Illuminate\Http\JsonResponse
-   */
+  * Get a JWT token via given credentials.
+  *
+  * @param  \Illuminate\Http\Request  $request
+  *
+  * @return \Illuminate\Http\JsonResponse
+  */
   public function login(Request $request)
   {
-      $credentials = $request->only('email', 'password');
+    $credentials = $request->only('email', 'password');
+    if ($token = auth('api')->attempt($credentials)) {
+      return $this->respondWithToken($token);
+    }
 
-      if ($token = auth('api')->attempt($credentials)) {
-          return $this->respondWithToken($token);
-      }
-
-      return response()->json(['error' => 'Unauthorized'], 401);
+    return response()->json(['error' => 'Unauthorized'], 401);
   }
   public function register(Request $request)
   {
@@ -64,46 +63,46 @@ class AuthController extends Controller
       );
 
       if ($token = auth('api')->attempt($credentials)) {
-          return $this->respondWithToken($token);
+        return $this->respondWithToken($token);
       }
     }else{
       return response()->json(['message' => 'Problem registering new record!'], 404);
     }
   }
   /**
-     * Log the user out (Invalidate the token)
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function logout()
-    {
-        auth('api')->logout();
+  * Log the user out (Invalidate the token)
+  *
+  * @return \Illuminate\Http\JsonResponse
+  */
+  public function logout()
+  {
+    auth('api')->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
-    }
-    public function me()
-    {
-        return response()->json(auth('api')->user());
-    }
-    public function refresh()
-    {
-        return $this->respondWithToken(auth('api')->refresh());
-    }
+    return response()->json(['message' => 'Successfully logged out']);
+  }
+  public function me()
+  {
+    return response()->json(auth('api')->user());
+  }
+  public function refresh()
+  {
+    return $this->respondWithToken(auth('api')->refresh());
+  }
 
 
   /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
-        ],200);
-    }
+  * Get the token array structure.
+  *
+  * @param  string $token
+  *
+  * @return \Illuminate\Http\JsonResponse
+  */
+  protected function respondWithToken($token)
+  {
+    return response()->json([
+      'access_token' => $token,
+      'token_type' => 'bearer',
+      'expires_in' => auth('api')->factory()->getTTL() * 60
+    ],200);
+  }
 }

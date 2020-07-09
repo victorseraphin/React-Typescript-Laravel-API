@@ -26,8 +26,8 @@ Route::group(['middleware' => ['apiJwt']], function () {
   Route::get('users', 'Api\UserController@index')->name('users');
   Route::get('users/{id}', 'Api\UserController@show')->name('users.show');
   Route::post('users/store', 'Api\UserController@store')->name('users.store');
-  Route::post('users/update/{id}', 'Api\UserController@update')->name('users.update');
-  Route::get('users/delete/{id}', 'Api\UserController@destroy')->name('users.delete');
+  Route::patch('users/update/{id}', 'Api\UserController@update')->name('users.update');
+  Route::delete('users/delete/{id}', 'Api\UserController@destroy')->name('users.delete');
 
   Route::get('products', 'Api\ProductsController@index')->name('products');
   Route::get('products/{id}', 'Api\ProductsController@show')->name('products.show');

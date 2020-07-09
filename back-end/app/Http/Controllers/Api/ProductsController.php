@@ -15,51 +15,8 @@ class ProductsController extends Controller
   */
   public function index()
   {
-    $table = Product::orderby('id', 'asc')->get();
+    $table = Product::do_all();
     return response()->json($table, 200);
-  }
-
-  /**
-  * Store a newly created resource in storage.
-  *
-  * @param  \Illuminate\Http\Request  $request
-  * @return \Illuminate\Http\Response
-  */
-
-  public function store(Request $request)
-  {
-
-    $request = $request->json()->all();
-
-    if($request['name'] ==  null){
-      return response()->json(['message' => "Enter a name."], 404);
-    }
-    if($request['description'] ==  null){
-      return response()->json(['message' => "Enter a description."], 404);
-    }
-    if($request['category'] ==  null){
-      return response()->json(['message' => "Enter a category."], 404);
-    }
-    if($request['price'] ==  null){
-      return response()->json(['message' => "Enter a price."], 404);
-    }
-    if($request['qty'] ==  null){
-      return response()->json(['message' => "Enter a quantity."], 404);
-    }
-
-    $data = new Product;
-    $data->name  = $request['name'];
-    $data->description  = $request['description'];
-    $data->price  = $request['price'];
-    $data->category  = $request['category'];
-    $data->qty  = $request['qty'];
-    $data->save();
-
-    if($data){
-      return response()->json(['message' => 'Registration successfully.'], 200);
-    }else{
-      return response()->json(['message' => 'Problem registering new record.'], 404);
-    }
   }
 
   /**
@@ -70,8 +27,55 @@ class ProductsController extends Controller
   */
   public function show($id)
   {
-    $table = Product::where('id',$id)->get();
+    $table = Product::do_show($id);
     return response()->json($table[0], 200);
+  }
+
+  /**
+  * Validates input
+  *
+  * @param  \Illuminate\Http\Request  $request
+  * @return \Illuminate\Http\Response
+  */
+  public function validate_inputs($request)
+  {
+    if($request['name'] ==  null){
+      return "Enter a name.";
+    }
+    if($request['description'] ==  null){
+      return "Enter a description.";
+    }
+    if($request['category'] ==  null){
+      return "Enter a category.";
+    }
+    if($request['price'] ==  null){
+      return "Enter a price.";
+    }
+    if($request['qty'] ==  null){
+      return "Enter a quantity.";
+    }
+  }
+
+  /**
+  * Store a newly created resource in storage.
+  *
+  * @param  \Illuminate\Http\Request  $request
+  * @return \Illuminate\Http\Response
+  */
+  public function store(Request $request)
+  {
+    $request = $request->json()->all();
+    $validate = $this->validate_inputs($request);
+    if(!$validate){
+      $data = Product::do_save($request);
+      if($data){
+        return response()->json(['message' => 'Registration successfully.'], 200);
+      }else{
+        return response()->json(['message' => 'Problem registering new record.'], 404);
+      }
+    }else{
+      return response()->json(['message' => $validate], 404);
+    }
   }
 
   /**
@@ -84,37 +88,17 @@ class ProductsController extends Controller
   public function update(Request $request, $id)
   {
     $request = $request->json()->all();
-
-    if($request['name'] ==  null){
-      return response()->json(['message' => "Enter a name."], 404);
-    }
-    if($request['description'] ==  null){
-      return response()->json(['message' => "Enter a description."], 404);
-    }
-    if($request['category'] ==  null){
-      return response()->json(['message' => "Enter a category."], 404);
-    }
-    if($request['price'] ==  null){
-      return response()->json(['message' => "Enter a price."], 404);
-    }
-    if($request['qty'] ==  null){
-      return response()->json(['message' => "Enter a quantity."], 404);
-    }
-
-    $data = Product::findOrFail($id);
-    $data->name  = $request['name'];
-    $data->description  = $request['description'];
-    $data->price  = $request['price'];
-    $data->category  = $request['category'];
-    $data->qty  = $request['qty'];
-    $data->save();
-
-    if($data){
-      return response()->json(['message' => 'Registration changed successfully.'], 200);
+    $validate = $this->validate_inputs($request);
+    if(!$validate){
+      $data = Product::do_save($request, $id);
+      if($data){
+        return response()->json(['message' => 'Registration changed successfully.'], 200);
+      }else{
+        return response()->json(['message' => 'Problem changing record.'], 404);
+      }
     }else{
-      return response()->json(['message' => 'Problem changing record.'], 404);
+      return response()->json(['message' => $validate], 404);
     }
-
   }
 
   /**
@@ -125,10 +109,11 @@ class ProductsController extends Controller
   */
   public function destroy($id)
   {
-    $data = Product::where('id',$id)->firstOrFail();
-    
-    $data->delete();
-    return response()->json(['message' => 'Registration deleted successfully.'], 200);
-
+    $data = Product::do_delete($id);
+    if($data){
+      return response()->json(['message' => 'Registration deleted successfully.'], 200);
+    }else{
+      return response()->json(['message' => 'Problem deleting record.'], 404);
+    }
   }
 }
